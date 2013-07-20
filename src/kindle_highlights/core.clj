@@ -31,18 +31,20 @@
                      [:td.titleAndAuthor])]
     (map
      (fn [a-td-tag]
-       (flatten (list (-> (html/select a-td-tag [:a])
-                         first
-                         :content)
-                      (uri/resolve-path
-                       current-url
-                       (-> (html/select a-td-tag [:a])
+       (map
+        (fn [s] (clojure.string/trim s))
+        (flatten (list (-> (html/select a-td-tag [:a])
                           first
-                          :attrs
-                          :href))
-                      (-> (html/select a-td-tag [:span])
-                         first
-                         :content))))
+                          :content)
+                       (uri/resolve-path
+                        current-url
+                        (-> (html/select a-td-tag [:a])
+                           first
+                           :attrs
+                           :href))
+                       (-> (html/select a-td-tag [:span])
+                          first
+                          :content)))))
      parsed-html)))
 
 (defn navigate-login-fetch-book-links
@@ -68,12 +70,12 @@
   (taxi/click "a[href*='your_reading']")
 
   ;; step through the pagination
-  (with-open [w (java.io.FileWriter. destination-file)]
-   (print-dup
+  (binding [*out* (java.io.FileWriter. destination-file)]
+   (clojure.pprint/pprint
     (reduce
      (fn [acc link]
        (taxi/click (format "a[href*='%s']" link))
        (concat acc (get-book-links (taxi/current-url) (taxi/html "table"))))
-     (list-pagination-links (taxi/html "div.paginationLinks")))
-    w))
+     []
+     (list-pagination-links (taxi/html "div.paginationLinks")))))
   (taxi/quit))
