@@ -1,9 +1,0 @@
-(ns kindle-highlights.main
-  (:require [clojure.tools.cli :as cli]))
-
-
-
-(defn -main
-  [& args]
-  (let [[optional [email password] banner] (cli/cli args)]
-    ()))
